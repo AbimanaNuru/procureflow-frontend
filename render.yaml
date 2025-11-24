@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: procureflow-frontend
+    env: docker
+    plan: free
+    branch: main
+    dockerContext: .
+    dockerfilePath: Dockerfile
+    numInstances: 1
+    healthCheckPath: /

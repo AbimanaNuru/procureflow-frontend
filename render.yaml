@@ -3,7 +3,7 @@ services:
     name: procureflow-frontend
     env: docker
     plan: free
-    branch: main
+    branch: development
     dockerContext: .
     dockerfilePath: Dockerfile
     numInstances: 1

@@ -12,6 +12,14 @@ RUN npm ci
 # Copy the rest of the application code
 COPY . .
 
+# Accept build arguments from Render
+ARG VITE_API_URL
+
+
+# Set environment variables for the build
+ENV VITE_API_URL=$VITE_API_URL
+
+
 # Build the application
 RUN npm run build
 

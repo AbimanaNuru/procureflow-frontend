@@ -1,34 +1,43 @@
-import { useNavigate } from "react-router-dom";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { TestUsersModal } from "@/components/TestUsersModal";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { useToast } from "@/hooks/use-toast";
+import { Input } from "@/components/ui/input";
+import { useAuth } from "@/contexts/AuthContext";
+import { useLogin } from "@/hooks/use-auth";
 import { loginSchema, type LoginInput } from "@/lib/validations";
+import { LoginRequest } from "@/types";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { Navigate, useLocation, useNavigate } from "react-router-dom";
 
 const Login = () => {
+  const { isAuthenticated } = useAuth();
+  const location = useLocation();
   const navigate = useNavigate();
-  const { toast } = useToast();
+  const loginMutation = useLogin();
 
   const form = useForm<LoginInput>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: "",
+      username: "",
       password: "",
     },
   });
 
+  // Redirect if already authenticated
+  if (isAuthenticated) {
+    const from = (location.state as any)?.from?.pathname || "/dashboard";
+    return <Navigate to={from} replace />;
+  }
+
   const onSubmit = async (data: LoginInput) => {
-    // Simulate login
-    setTimeout(() => {
-      toast({
-        title: "Login Successful",
-        description: "Welcome back to ProcureFlow",
-      });
-      navigate("/dashboard");
-    }, 1000);
+    console.log(data);
+    loginMutation.mutate(data as LoginRequest, {
+      onSuccess: () => {
+        navigate("/requests");
+      },
+    });
   };
 
   return (
@@ -40,6 +49,9 @@ const Login = () => {
           </div>
           <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">ProcureFlow</h1>
           <p className="text-muted-foreground text-lg">Procurement Management System</p>
+          <div className="mt-4">
+            <TestUsersModal />
+          </div>
         </div>
 
         <Card className="shadow-xl">
@@ -52,12 +64,12 @@ const Login = () => {
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
                 <FormField
                   control={form.control}
-                  name="email"
+                  name="username"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Email</FormLabel>
+                      <FormLabel>Username</FormLabel>
                       <FormControl>
-                        <Input placeholder="name@company.com" {...field} />
+                        <Input placeholder="Enter your username" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -76,19 +88,16 @@ const Login = () => {
                     </FormItem>
                   )}
                 />
-                <Button type="submit" className="w-full h-11 text-base font-medium" disabled={form.formState.isSubmitting}>
-                  {form.formState.isSubmitting ? "Signing in..." : "Sign In"}
+                <Button 
+                  type="submit" 
+                  className="w-full h-11 text-base font-medium" 
+                  disabled={loginMutation.isPending}
+                >
+                  {loginMutation.isPending ? "Signing in..." : "Sign In"}
                 </Button>
               </form>
             </Form>
-            <div className="mt-8 p-5 bg-muted/50 rounded-xl border border-border">
-              <p className="text-sm font-medium text-muted-foreground mb-3">Demo Credentials:</p>
-              <div className="space-y-2">
-                <p className="text-sm font-mono bg-background/50 px-3 py-2 rounded">staff@example.com</p>
-                <p className="text-sm font-mono bg-background/50 px-3 py-2 rounded">approver@example.com</p>
-                <p className="text-sm font-mono bg-background/50 px-3 py-2 rounded">finance@example.com</p>
-              </div>
-            </div>
+        
           </CardContent>
         </Card>
       </div>

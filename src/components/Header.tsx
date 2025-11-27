@@ -1,7 +1,7 @@
-import { Button } from "@/components/ui/button";
-import { LogOut, Bell } from "lucide-react";
-import { Link, useLocation } from "react-router-dom";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { Button } from "@/components/ui/button";
+import { Bell, LogOut } from "lucide-react";
+import { Link, useLocation } from "react-router-dom";
 
 interface HeaderProps {
   userName?: string;
@@ -45,15 +45,37 @@ export const Header = ({ userName = "User", role = "Staff", onLogout }: HeaderPr
                 Requests
               </Link>
               <Link
-                to="/settings"
+                to="/purchase-orders"
                 className={`text-sm font-medium transition-colors ${
-                  location.pathname === "/settings"
+                  location.pathname.startsWith("/purchase-orders")
                     ? "text-foreground"
                     : "text-muted-foreground hover:text-foreground"
                 }`}
               >
-                Settings
+                Purchase Orders
               </Link>
+              <Link
+                to="/users"
+                className={`text-sm font-medium transition-colors ${
+                  location.pathname === "/users"
+                    ? "text-foreground"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                Users
+              </Link>
+              <Link
+                to="/profile"
+                className={`text-sm font-medium transition-colors ${
+                  location.pathname === "/profile"
+                    ? "text-foreground"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                Profile
+              </Link>
+
+              
             </nav>
           </div>
           <div className="flex items-center gap-4">

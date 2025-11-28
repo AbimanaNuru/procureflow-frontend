@@ -37,6 +37,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Plus } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { useNavigate } from "react-router-dom";
 import * as z from "zod";
 
 const createConfigSchema = z.object({
@@ -49,6 +50,7 @@ const createConfigSchema = z.object({
 });
 
 const ApprovalConfigs = () => {
+    const navigate = useNavigate();
     const [page, setPage] = useState(1);
     const [isCreateOpen, setIsCreateOpen] = useState(false);
     const { data, isLoading } = useApprovalConfigs(page);
@@ -189,18 +191,19 @@ const ApprovalConfigs = () => {
                                 <TableHead>Levels</TableHead>
                                 <TableHead>Status</TableHead>
                                 <TableHead>Created At</TableHead>
+                                <TableHead>Actions</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {isLoading ? (
                                 <TableRow>
-                                    <TableCell colSpan={5} className="text-center py-10">
+                                    <TableCell colSpan={6} className="text-center py-10">
                                         Loading...
                                     </TableCell>
                                 </TableRow>
                             ) : data?.results.length === 0 ? (
                                 <TableRow>
-                                    <TableCell colSpan={5} className="text-center py-10">
+                                    <TableCell colSpan={6} className="text-center py-10">
                                         No configurations found
                                     </TableCell>
                                 </TableRow>
@@ -221,6 +224,18 @@ const ApprovalConfigs = () => {
                                         </TableCell>
                                         <TableCell>
                                             {new Date(config.created_at).toLocaleDateString()}
+                                        </TableCell>
+                                        <TableCell>
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    navigate(`/approval-configs/${config.id}`);
+                                                }}
+                                            >
+                                                View Details
+                                            </Button>
                                         </TableCell>
                                     </TableRow>
                                 ))

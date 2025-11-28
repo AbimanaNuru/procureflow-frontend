@@ -30,4 +30,14 @@ export const approvalService = {
         );
         return response.data;
     },
+
+    /**
+     * Get a single approval configuration by ID
+     */
+    getApprovalConfig: async (id: string): Promise<ApprovalConfig> => {
+        const response = await apiClient.get<ApprovalConfig>(
+            `/procurement/approval-configs/${id}/`
+        );
+        return response.data;
+    },
 };

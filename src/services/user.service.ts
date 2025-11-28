@@ -65,6 +65,14 @@ export const userService = {
     },
 
     /**
+     * Get user permissions array by ID
+     */
+    getUserPermissions: async (userId: string): Promise<string[]> => {
+        const response = await apiClient.get<{ permissions: string[] }>(`/users/${userId}/permissions/`);
+        return response.data.permissions;
+    },
+
+    /**
      * Get current user profile
      */
     getProfile: async (): Promise<UserProfile> => {

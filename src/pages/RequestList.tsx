@@ -3,12 +3,14 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "@/components/ui/select";
+import { PERMISSIONS } from "@/config/permission-config";
+import { usePermission } from "@/hooks/use-permission";
 import { useRequests } from "@/hooks/use-request";
 import { Bot, Filter, Loader2, Plus, Search } from "lucide-react";
 import { useState } from "react";
@@ -18,6 +20,7 @@ const RequestList = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [currentPage, setCurrentPage] = useState(1);
+  const canCreateRequest = usePermission(PERMISSIONS.ADD_PURCHASE_REQUEST);
 
   const { data, isLoading, isError, error } = useRequests(currentPage);
 
@@ -56,12 +59,14 @@ const RequestList = () => {
                 AI Request
               </Button>
             </Link>
-            <Link to="/requests/new">
-              <Button size="lg" className="gap-2 h-12 px-6 text-base font-medium shadow-lg hover:shadow-xl transition-shadow">
-                <Plus className="h-5 w-5" />
-                New Request
-              </Button>
-            </Link>
+            {canCreateRequest && (
+              <Link to="/requests/new">
+                <Button size="lg" className="gap-2 h-12 px-6 text-base font-medium shadow-lg hover:shadow-xl transition-shadow">
+                  <Plus className="h-5 w-5" />
+                  New Request
+                </Button>
+              </Link>
+            )}
           </div>
         </div>
 

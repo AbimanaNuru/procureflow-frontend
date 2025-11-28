@@ -23,6 +23,7 @@ export const useLogin = () => {
             toast({
                 title: 'Login Successful',
                 description: 'Welcome back to ProcureFlow',
+                className: "bg-green-600 text-white border-green-600",
             });
 
             // Invalidate and refetch user data

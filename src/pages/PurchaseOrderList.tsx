@@ -1,16 +1,20 @@
+
 import { StatusBadge } from "@/components/StatusBadge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { PERMISSIONS } from "@/config/permission-config";
+import { usePermission } from "@/hooks/use-permission";
 import { usePurchaseOrders } from "@/hooks/use-purchase-order";
 import { PurchaseOrder } from "@/types";
-import { FileText, Loader2, Package, Search } from "lucide-react";
+import { FileText, Loader2, Package, Search, ShieldAlert } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 
 const PurchaseOrderList = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const canViewPOs = usePermission(PERMISSIONS.VIEW_PURCHASE_ORDER);
 
   const { data, isLoading, isError, error } = usePurchaseOrders(currentPage);
 
@@ -37,6 +41,25 @@ const PurchaseOrderList = () => {
             <p className="ml-3 text-muted-foreground text-lg">Loading purchase orders...</p>
           </div>
         </main>
+      </div>
+    );
+  }
+
+  if (!canViewPOs) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <ShieldAlert className="h-16 w-16 text-destructive mx-auto" />
+          <h2 className="text-2xl font-bold">Access Denied</h2>
+          <p className="text-muted-foreground">
+            You do not have permission to view purchase orders.
+          </p>
+          <Link to="/dashboard">
+            <Button variant="outline" className="mt-4">
+              Return to Dashboard
+            </Button>
+          </Link>
+        </div>
       </div>
     );
   }

@@ -32,7 +32,6 @@ const Login = () => {
   }
 
   const onSubmit = async (data: LoginInput) => {
-    console.log(data);
     loginMutation.mutate(data as LoginRequest, {
       onSuccess: () => {
         navigate("/requests");

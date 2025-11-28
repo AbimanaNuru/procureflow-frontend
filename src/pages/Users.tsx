@@ -1,61 +1,43 @@
-import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
 } from "@/components/ui/table";
-import { useDeleteUser, useUsers } from "@/hooks/use-user";
-import { User } from "@/types";
+import { useUsers } from "@/hooks/use-user";
 import { format } from "date-fns";
-import { Edit, MoreVertical, Plus, Search, Shield, Trash2, UserCircle } from "lucide-react";
+import { MoreVertical, Search, Shield, UserCircle } from "lucide-react";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const Users = () => {
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [userToDelete, setUserToDelete] = useState<User | null>(null);
-  
+
   const { data, isLoading, error } = useUsers(currentPage);
-  const deleteUser = useDeleteUser();
+
 
   const getInitials = (firstName: string, lastName: string) => {
     return `${firstName?.charAt(0) || ''}${lastName?.charAt(0) || ''}`.toUpperCase() || '?';
   };
 
-  const handleDelete = () => {
-    if (userToDelete) {
-      deleteUser.mutate(userToDelete.id, {
-        onSuccess: () => {
-          setUserToDelete(null);
-        },
-      });
-    }
-  };
+
 
   const filteredUsers = data?.results.filter((user) =>
     user.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -77,10 +59,6 @@ const Users = () => {
               Manage users, roles, and permissions
             </p>
           </div>
-          <Button className="gap-2">
-            <Plus className="h-4 w-4" />
-            Add User
-          </Button>
         </div>
 
         {/* Search and Filters */}
@@ -198,25 +176,19 @@ const Users = () => {
                               <DropdownMenuContent align="end">
                                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
                                 <DropdownMenuSeparator />
-                                <DropdownMenuItem className="gap-2">
+                                <DropdownMenuItem 
+                                  className="gap-2"
+                                  onClick={() => navigate(`/users/${user.id}`)}
+                                >
                                   <UserCircle className="h-4 w-4" />
                                   View Profile
                                 </DropdownMenuItem>
-                                <DropdownMenuItem className="gap-2">
-                                  <Edit className="h-4 w-4" />
-                                  Edit User
-                                </DropdownMenuItem>
-                                <DropdownMenuItem className="gap-2">
+                                <DropdownMenuItem 
+                                  className="gap-2"
+                                  onClick={() => navigate(`/users/${user.id}/permissions`)}
+                                >
                                   <Shield className="h-4 w-4" />
                                   Manage Permissions
-                                </DropdownMenuItem>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem
-                                  className="gap-2 text-destructive focus:text-destructive"
-                                  onClick={() => setUserToDelete(user)}
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                  Delete User
                                 </DropdownMenuItem>
                               </DropdownMenuContent>
                             </DropdownMenu>
@@ -267,27 +239,7 @@ const Users = () => {
         </Card>
       </div>
 
-      {/* Delete Confirmation Dialog */}
-      <AlertDialog open={!!userToDelete} onOpenChange={() => setUserToDelete(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This will permanently delete the user <strong>{userToDelete?.username}</strong>.
-              This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDelete}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              {deleteUser.isPending ? 'Deleting...' : 'Delete'}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+
     </div>
   );
 };

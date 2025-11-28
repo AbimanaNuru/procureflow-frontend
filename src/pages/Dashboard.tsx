@@ -1,12 +1,16 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { PERMISSIONS } from "@/config/permission-config";
+import { usePermission } from "@/hooks/use-permission";
 import { useRequests } from "@/hooks/use-request";
-import { CheckCircle, Clock, FileText, Loader2, Plus, XCircle } from "lucide-react";
+import { Loader2, Plus } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const canCreateRequest = usePermission(PERMISSIONS.ADD_PURCHASE_REQUEST);
+  const canViewRequests = usePermission(PERMISSIONS.VIEW_PURCHASE_REQUEST);
 
 
 
@@ -22,12 +26,14 @@ const Dashboard = () => {
             <h1 className="text-4xl font-bold mb-3 bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Dashboard</h1>
             <p className="text-muted-foreground text-lg">Welcome back! Here's your procurement overview.</p>
           </div>
-          <Link to="/requests/new">
-            <Button size="lg" className="gap-2 h-12 px-6 text-base font-medium shadow-lg hover:shadow-xl transition-shadow">
-              <Plus className="h-5 w-5" />
-              New Request
-            </Button>
-          </Link>
+          {canCreateRequest && (
+            <Link to="/requests/new">
+              <Button size="lg" className="gap-2 h-12 px-6 text-base font-medium shadow-lg hover:shadow-xl transition-shadow">
+                <Plus className="h-5 w-5" />
+                New Request
+              </Button>
+            </Link>
+          )}
         </div>
 
    
@@ -84,9 +90,11 @@ const Dashboard = () => {
               )}
             </div>
             <div className="mt-6 text-center">
-              <Link to="/requests">
-                <Button variant="outline" className="h-11 px-6 text-base">View All Requests</Button>
-              </Link>
+              {canViewRequests && (
+                <Link to="/requests">
+                  <Button variant="outline" className="h-11 px-6 text-base">View All Requests</Button>
+                </Link>
+              )}
             </div>
           </CardContent>
         </Card>

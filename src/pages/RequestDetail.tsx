@@ -13,8 +13,10 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
+import { PERMISSIONS } from "@/config/permission-config";
 import { useApproveRequest, useRejectRequest, useValidateReceipt } from "@/hooks/use-ai-request";
 import { useCreateItem, useUpdateItem } from "@/hooks/use-item";
+import { usePermission } from "@/hooks/use-permission";
 import { useCreatePurchaseOrder } from "@/hooks/use-purchase-order";
 import { useRequest } from "@/hooks/use-request";
 import { useToast } from "@/hooks/use-toast";
@@ -45,6 +47,12 @@ const RequestDetail = () => {
   const [showEditItemDialog, setShowEditItemDialog] = useState(false);
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
   const [showPurchaseOrderDialog, setShowPurchaseOrderDialog] = useState(false);
+
+  const canApprove = usePermission(PERMISSIONS.APPROVE_PURCHASE_REQUEST);
+  const canReject = usePermission(PERMISSIONS.REJECT_PURCHASE_REQUEST);
+  const canAddItem = usePermission(PERMISSIONS.ADD_REQUEST_ITEM);
+  const canEditItem = usePermission(PERMISSIONS.CHANGE_REQUEST_ITEM);
+  const canCreatePO = usePermission(PERMISSIONS.ADD_PURCHASE_ORDER);
 
   const { data: request, isLoading, isError, error } = useRequest(id || "");
   const createItemMutation = useCreateItem();
@@ -384,7 +392,7 @@ const RequestDetail = () => {
                 <div>
                   <div className="flex items-center justify-between mb-3">
                     <h3 className="font-semibold">Items</h3>
-                    {request.status === "pending" && (
+                    {request.status === "pending" && canAddItem && (
                       <Button
                         type="button"
                         variant="outline"
@@ -404,7 +412,7 @@ const RequestDetail = () => {
                             <p className="font-medium">{item.name}</p>
                             <div className="flex items-center gap-2">
                               <p className="font-bold text-primary">${parseFloat(item.total_price).toFixed(2)}</p>
-                              {request.status === "pending" && (
+                              {request.status === "pending" && canEditItem && (
                                 <Button
                                   type="button"
                                   variant="ghost"
@@ -532,118 +540,122 @@ const RequestDetail = () => {
               </CardContent>
             </Card>
 
-            {request.status === "pending" && (
+            {request.status === "pending" && (canApprove || canReject) && (
               <Card>
                 <CardHeader>
                   <CardTitle>Actions</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  <Dialog open={showApproveDialog} onOpenChange={setShowApproveDialog}>
-                    <DialogTrigger asChild>
-                      <Button className="w-full">
-                        Approve Request
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                      <DialogHeader>
-                        <DialogTitle>Approve Request</DialogTitle>
-                        <DialogDescription>
-                          Add your approval comment
-                        </DialogDescription>
-                      </DialogHeader>
-                      <Form {...approveForm}>
-                        <form onSubmit={approveForm.handleSubmit(onApprove)} className="space-y-4">
-                          <FormField
-                            control={approveForm.control}
-                            name="comment"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Comment</FormLabel>
-                                <FormControl>
-                                  <Textarea
-                                    placeholder="Add your approval comment..."
-                                    rows={3}
-                                    {...field}
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                          <div className="flex gap-3 justify-end">
-                            <Button
-                              type="button"
-                              variant="outline"
-                              onClick={() => setShowApproveDialog(false)}
-                            >
-                              Cancel
-                            </Button>
-                            <Button type="submit" disabled={approveForm.formState.isSubmitting || approveRequestMutation.isPending}>
-                              {approveForm.formState.isSubmitting || approveRequestMutation.isPending ? "Processing..." : "Approve"}
-                            </Button>
-                          </div>
-                        </form>
-                      </Form>
-                    </DialogContent>
-                  </Dialog>
+                  {canApprove && (
+                    <Dialog open={showApproveDialog} onOpenChange={setShowApproveDialog}>
+                      <DialogTrigger asChild>
+                        <Button className="w-full">
+                          Approve Request
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>Approve Request</DialogTitle>
+                          <DialogDescription>
+                            Add your approval comment
+                          </DialogDescription>
+                        </DialogHeader>
+                        <Form {...approveForm}>
+                          <form onSubmit={approveForm.handleSubmit(onApprove)} className="space-y-4">
+                            <FormField
+                              control={approveForm.control}
+                              name="comment"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Comment</FormLabel>
+                                  <FormControl>
+                                    <Textarea
+                                      placeholder="Add your approval comment..."
+                                      rows={3}
+                                      {...field}
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                            <div className="flex gap-3 justify-end">
+                              <Button
+                                type="button"
+                                variant="outline"
+                                onClick={() => setShowApproveDialog(false)}
+                              >
+                                Cancel
+                              </Button>
+                              <Button type="submit" disabled={approveForm.formState.isSubmitting || approveRequestMutation.isPending}>
+                                {approveForm.formState.isSubmitting || approveRequestMutation.isPending ? "Processing..." : "Approve"}
+                              </Button>
+                            </div>
+                          </form>
+                        </Form>
+                      </DialogContent>
+                    </Dialog>
+                  )}
 
-                  <Dialog open={showRejectDialog} onOpenChange={setShowRejectDialog}>
-                    <DialogTrigger asChild>
-                      <Button variant="destructive" className="w-full">
-                        Reject Request
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                      <DialogHeader>
-                        <DialogTitle>Reject Request</DialogTitle>
-                        <DialogDescription>
-                          Please provide a reason for rejection
-                        </DialogDescription>
-                      </DialogHeader>
-                      <Form {...rejectForm}>
-                        <form onSubmit={rejectForm.handleSubmit(onReject)} className="space-y-4">
-                          <FormField
-                            control={rejectForm.control}
-                            name="comment"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Reason</FormLabel>
-                                <FormControl>
-                                  <Textarea
-                                    placeholder="Explain why this request is being rejected..."
-                                    rows={3}
-                                    {...field}
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                          <div className="flex gap-3 justify-end">
-                            <Button
-                              type="button"
-                              variant="outline"
-                              onClick={() => setShowRejectDialog(false)}
-                            >
-                              Cancel
-                            </Button>
-                            <Button
-                              type="submit"
-                              variant="destructive"
-                              disabled={rejectForm.formState.isSubmitting || rejectRequestMutation.isPending}
-                            >
-                              {rejectForm.formState.isSubmitting || rejectRequestMutation.isPending ? "Processing..." : "Reject"}
-                            </Button>
-                          </div>
-                        </form>
-                      </Form>
-                    </DialogContent>
-                  </Dialog>
+                  {canReject && (
+                    <Dialog open={showRejectDialog} onOpenChange={setShowRejectDialog}>
+                      <DialogTrigger asChild>
+                        <Button variant="destructive" className="w-full">
+                          Reject Request
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>Reject Request</DialogTitle>
+                          <DialogDescription>
+                            Please provide a reason for rejection
+                          </DialogDescription>
+                        </DialogHeader>
+                        <Form {...rejectForm}>
+                          <form onSubmit={rejectForm.handleSubmit(onReject)} className="space-y-4">
+                            <FormField
+                              control={rejectForm.control}
+                              name="comment"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Reason</FormLabel>
+                                  <FormControl>
+                                    <Textarea
+                                      placeholder="Explain why this request is being rejected..."
+                                      rows={3}
+                                      {...field}
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                            <div className="flex gap-3 justify-end">
+                              <Button
+                                type="button"
+                                variant="outline"
+                                onClick={() => setShowRejectDialog(false)}
+                              >
+                                Cancel
+                              </Button>
+                              <Button
+                                type="submit"
+                                variant="destructive"
+                                disabled={rejectForm.formState.isSubmitting || rejectRequestMutation.isPending}
+                              >
+                                {rejectForm.formState.isSubmitting || rejectRequestMutation.isPending ? "Processing..." : "Reject"}
+                              </Button>
+                            </div>
+                          </form>
+                        </Form>
+                      </DialogContent>
+                    </Dialog>
+                  )}
                 </CardContent>
               </Card>
             )}
 
-            {request.status === "approved" && !request.purchase_order && (
+            {request.status === "approved" && !request.purchase_order && canCreatePO && (
               <Card>
                 <CardHeader>
                   <CardTitle>Purchase Order</CardTitle>

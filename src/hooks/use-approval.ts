@@ -19,6 +19,18 @@ export const useApprovalConfigs = (page = 1) => {
 };
 
 /**
+ * Hook to get a single approval configuration by ID
+ */
+export const useApprovalConfig = (id: string) => {
+    return useQuery<ApprovalConfig, Error>({
+        queryKey: ['approval-config', id],
+        queryFn: () => approvalService.getApprovalConfig(id),
+        enabled: !!id,
+        staleTime: 5 * 60 * 1000, // 5 minutes
+    });
+};
+
+/**
  * Hook to create a new approval configuration
  */
 export const useCreateApprovalConfig = () => {

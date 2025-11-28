@@ -1,4 +1,5 @@
 import { useUserProfile } from '@/hooks/use-user';
+import { userService } from '@/services';
 import { UserProfile } from '@/types';
 import { createContext, ReactNode, useContext, useEffect, useState } from 'react';
 
@@ -21,8 +22,33 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [accessToken, setAccessToken] = useState<string | null>(
     localStorage.getItem('accessToken')
   );
+  const [userWithPermissions, setUserWithPermissions] = useState<UserProfile | null>(null);
 
-  const { data: user, isLoading } = useUserProfile();
+  const { data: user, isLoading: isLoadingProfile } = useUserProfile();
+  const [isLoadingPermissions, setIsLoadingPermissions] = useState(false);
+
+  // Fetch permissions when user profile is loaded
+  useEffect(() => {
+    const fetchPermissions = async () => {
+      if (user?.id && accessToken) {
+        setIsLoadingPermissions(true);
+        try {
+          const permissions = await userService.getUserPermissions(user.id);
+          setUserWithPermissions({ ...user, permissions });
+        } catch (error) {
+          console.error('Failed to fetch permissions:', error);
+          // Set user without permissions if fetch fails
+          setUserWithPermissions({ ...user, permissions: [] });
+        } finally {
+          setIsLoadingPermissions(false);
+        }
+      } else {
+        setUserWithPermissions(null);
+      }
+    };
+
+    fetchPermissions();
+  }, [user, accessToken]);
 
   useEffect(() => {
     // Listen for storage changes (e.g., login/logout in another tab)
@@ -45,12 +71,13 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     localStorage.removeItem('refreshToken');
     localStorage.removeItem('user');
     setAccessToken(null);
+    setUserWithPermissions(null);
   };
 
   const value: AuthContextType = {
-    user: user || null,
+    user: userWithPermissions,
     isAuthenticated: !!accessToken,
-    isLoading,
+    isLoading: isLoadingProfile || isLoadingPermissions,
     accessToken,
     login,
     logout,

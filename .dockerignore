@@ -5,5 +5,3 @@ dist
 .env
 .DS_Store
 Dockerfile
-
-README.md

@@ -7,6 +7,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import AIRequest from "./pages/AIRequest";
+import ApprovalConfigDetail from "./pages/ApprovalConfigDetail";
 import ApprovalConfigs from "./pages/ApprovalConfigs";
 import Dashboard from "./pages/Dashboard";
 import Login from "./pages/Login";
@@ -17,8 +19,9 @@ import PurchaseOrderDetail from "./pages/PurchaseOrderDetail";
 import PurchaseOrderList from "./pages/PurchaseOrderList";
 import RequestDetail from "./pages/RequestDetail";
 import RequestList from "./pages/RequestList";
+import UserDetail from "./pages/UserDetail";
+import UserPermissions from "./pages/UserPermissions";
 import Users from "./pages/Users";
-import AIRequest from "./pages/AIRequest";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -49,7 +52,10 @@ const App = () => (
                 <Route path="/purchase-orders" element={<PurchaseOrderList />} />
                 <Route path="/purchase-orders/:id" element={<PurchaseOrderDetail />} />
                 <Route path="/users" element={<Users />} />
+                <Route path="/users/:id" element={<UserDetail />} />
+                <Route path="/users/:id/permissions" element={<UserPermissions />} />
                 <Route path="/approval-configs" element={<ApprovalConfigs />} />
+                <Route path="/approval-configs/:id" element={<ApprovalConfigDetail />} />
                 <Route path="/profile" element={<Profile />} />
               </Route>
               <Route path="*" element={<NotFound />} />

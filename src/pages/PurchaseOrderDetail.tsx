@@ -2,24 +2,26 @@ import { StatusBadge } from "@/components/StatusBadge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
 } from "@/components/ui/dialog";
 import {
-    Form,
-    FormControl,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage,
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
+import { PERMISSIONS } from "@/config/permission-config";
+import { usePermission } from "@/hooks/use-permission";
 import { usePurchaseOrder, useUpdatePurchaseOrder } from "@/hooks/use-purchase-order";
 import { PurchaseOrderInput, purchaseOrderSchema } from "@/lib/validations";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -34,6 +36,7 @@ const PurchaseOrderDetail = () => {
   const { data: po, isLoading, isError, error } = usePurchaseOrder(id || "");
   const updatePurchaseOrderMutation = useUpdatePurchaseOrder();
   const [showEditDialog, setShowEditDialog] = useState(false);
+  const canEditPO = usePermission(PERMISSIONS.CHANGE_PURCHASE_ORDER);
 
   const editForm = useForm<PurchaseOrderInput>({
     resolver: zodResolver(purchaseOrderSchema),
@@ -202,14 +205,16 @@ const PurchaseOrderDetail = () => {
                 <CardTitle>Actions</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                <Button 
-                  className="w-full" 
-                  variant="outline"
-                  onClick={() => setShowEditDialog(true)}
-                >
-                  <Edit className="h-4 w-4 mr-2" />
-                  Edit Purchase Order
-                </Button>
+                {canEditPO && (
+                  <Button 
+                    className="w-full" 
+                    variant="outline"
+                    onClick={() => setShowEditDialog(true)}
+                  >
+                    <Edit className="h-4 w-4 mr-2" />
+                    Edit Purchase Order
+                  </Button>
+                )}
                 <Button className="w-full" variant="outline">
                   <FileCheck className="h-4 w-4 mr-2" />
                   Download PDF

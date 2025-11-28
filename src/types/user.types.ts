@@ -38,6 +38,7 @@ export interface UserProfile {
     department: string;
     employee_id: string;
     groups: UserGroup[];
+    permissions: string[]; // Array of permission codenames from backend
 }
 
 export interface PaginatedUsersResponse {
